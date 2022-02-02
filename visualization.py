@@ -100,11 +100,11 @@ def draw():
                     bottom = my+ (maprect.bottom - my ) * zoom
                     maprect = pygame.Rect(left, top, bottom, right-left, bottom-top)
                     blitmap()
-        
+
 
         pygame.display.flip()
 
         clk.tick(10)
     sys.exit()
-
-draw()
+if __name__ == "__main__":
+    draw()
