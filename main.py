@@ -49,6 +49,12 @@ move directly towards the center of the circle?
 
 """
 
+"""
+todo:
+- compute number of holding positions available (easy grid problem while maintaining at least one access on each side
+- have atc generate paths to/from holding cells.
+- visualization?
+"""
 
 class Plane():
     def __init__(self, id, degrees):
