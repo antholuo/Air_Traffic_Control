@@ -54,6 +54,7 @@ class Plane():
         self.y = math.sin(degrees)
         self.heading = 180 + (90 - degrees)  # global heading.
         self.state = 0;
+
         """States for the plane:
         0: entering our airspace
         1: guided towards holding location
@@ -107,6 +108,20 @@ class HoldingLoc():
         self.vacant = True
         self.occupant = None
 
+class Runway():
+    def __init__(self, center, length=RUNWAY_LENGTH, width=RUNWAY_WIDTH):
+        self.North_Target = center + RUNWAY_LENGTH/2
+        self.South_Target = center - RUNWAY_LENGTH/2
+        self.in_use = False
+
+    def set_in_use(self):
+        self.in_use = True
+
+    def get_status(self):
+        if self.in_use:
+            return "occupied" # occupied
+        else:
+            return "vacant"
 
 class Controller():
     # everything talks to the controller, and the controller has complete control over everything (theoretically)
@@ -114,26 +129,59 @@ class Controller():
                  num_runways=NUM_RUNWAYS, holding_locs=[]):
         self.radius = radius
         self.planes = planes  # in case there are existing planes which need to be handled
+        self.runways = []
         self.runway_width = runway_width
         self.runway_length = runway_length
         self.num_runways = num_runways
         self.holding_locs = holding_locs
-        self.num_spots = len(holding_locs) - 1
+        self.empty_locs = holding_locs
+        self.occupied_locs = {}
+
+    def add_runway(self, runway):
+        # choose to add here because runways could be different daily
+        self.runways.append(runway)
+
+    def rm_runway(self, runway):
+        self.runways.remove(runway) # thankfully python remove lets us remove by value
 
     def add_plane(self, plane, id):
         if self.num_spots > 0:
-            self.planes.append(plane)
+            plane_instruction_pair = plane, plane.heading, [] # not actually a pair, it consists of the plane, current heading, and future queued instructions.
+            self.planes.append(plane_instruction_pair) # this makes it easier to assign instructions later
         else:
             plane.update_heading(plane.heading + 180)  # turn around the plane
+
+
+    def try_holding(self, plane, idx, spot):
+        self.planes[idx] = plane, instructions_to_spot(plane, spot)
 
     def hold_plane(self, plane, spot):
         # plane is already in position to hold
         # assume that if they are within the area of a holding pattern, they can self navigate to spin in circles
         plane_loc = plane.get_location()
         plane.set_holding()
-        spot.set_full(plane.get_id)
+        spot.set_full(plane.get_id) # sets this spot to be full!
+        self.occupied_locs[plane.get_id] = spot # set this spot to be matched with plane id
+        self.empty_locs.remove(spot)
+
+    def try_landing(self, plane, idx):
+        spot = self.occupied_locs[plane.get_id]
+        self.occupied_locs.pop(plane.get_id)
+        self.empty_locs.append(spot)
+        spot.set_vacant
 
 
+        for runway in self.runways:
+            # todo: add a system to determine closest points from runways, and then check in that priority
+            if runway.get_status == "vacant": # no priority for one runway over another.
+                heading, instructions = intsructions_to_land(plane, runway) # just being explicit
+                self.planes[idx] = plane, heading, instructions
+                plane.set_to_land()
+        else:
+            plane.set_holding() # continue holding
+
+
+        # compute heading
 def main():
     return
 
