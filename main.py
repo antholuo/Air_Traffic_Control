@@ -174,7 +174,7 @@ class Controller():
         for runway in self.runways:
             # todo: add a system to determine closest points from runways, and then check in that priority
             if runway.get_status == "vacant": # no priority for one runway over another.
-                heading, instructions = intsructions_to_land(plane, runway) # just being explicit
+                heading, instructions = instructions_to_land(plane, runway) # just being explicit
                 self.planes[idx] = plane, heading, instructions
                 plane.set_to_land()
         else:
