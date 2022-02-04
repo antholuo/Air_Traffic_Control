@@ -92,7 +92,7 @@ def instructions_to_spot(plane, spot):
     # take radius of all objects and increase that and then run A*.
     return
 
-def find_nearest_lane_node(current_loc, lanes: list[HoldingLoc], destination = None) -> HoldingLoc:
+def find_nearest_lane_node(lanes: list[HoldingLoc], current_loc = (0,0), destination = None) -> HoldingLoc:
     if destination == None:
         # just looking for the nearest lane node to begin with
             # -> can be optimized further to  find lane node in specific direction.
@@ -104,6 +104,15 @@ def find_nearest_lane_node(current_loc, lanes: list[HoldingLoc], destination = N
                 dist = temp_dist
                 nearest = spot
     else:
+        # find spot closest to the end point.
+        nearest = lanes[0]
+        dist = 22000  # large distance to start with
+        for spot in lanes:
+            temp_dist = pythagoras(current_loc[0], current_loc[1], spot.get_x, spot.get_y)
+            dist_to_dest = pythagoras(destination[0], destination[1], spot.get_x, spot.get_y)
+            if temp_dist < 5000 and dist_to_dest < dist:
+                dist = temp_dist
+                nearest = spot
         # centers of two adjacent lane nodes should not be more than 5000km away -> but there is no way for there to be multiple in this range
 
     return nearest
