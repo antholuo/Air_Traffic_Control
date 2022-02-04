@@ -37,6 +37,7 @@ def generate_spots() -> list[HoldingLoc]:
     generative_radius = HOLD_RADIUS + RUNWAY_SPACING / 2 + RUNWAY_WIDTH + TRAFFIC_MIN_DIST
     RADIUS_STEP = HOLD_RADIUS + TRAFFIC_MIN_DIST
     spots = []
+    lanes = []
     double = 0
     while generative_radius < (ATC_RADIUS-2000): #subtract 2000 since we need to leave access ring on the outside
         # leaving the runway widths open.
@@ -59,6 +60,7 @@ def generate_spots() -> list[HoldingLoc]:
                             # i and j will go through all combinations of x,y combinations
                             spot = HoldingLoc(i * x, j * y, parkable=False, vacant=True)
                             spots.append(spot)
+                            lanes.append(spot) # this should not be needed in the end, but is an optimization that we make
                     double = 0;
                 else:
                     for i in range(-1, 0):
@@ -73,6 +75,10 @@ def generate_spots() -> list[HoldingLoc]:
 
     return spots  # by nature of spots, the closest spots are first in the list.
 
+def find_respective_runway(x, y):
+    runway_x = 0
+    runway_y = 0
+    return runway_x, runway_y
 
 def instructions_to_land(plane, runway):
     # find nearest runway opening
@@ -86,11 +92,39 @@ def instructions_to_spot(plane, spot):
     # take radius of all objects and increase that and then run A*.
     return
 
-def astar(current_loc: tuple(float, float), targ_loc)->list[[int, tuple(float, float)]]:
-    """
+def find_nearest_lane_node(current_loc, lanes: list[HoldingLoc], destination = None) -> HoldingLoc:
+    if destination == None:
+        # just looking for the nearest lane node to begin with
+            # -> can be optimized further to  find lane node in specific direction.
+        nearest = lanes[0]
+        dist = 22000  # unreasonably large number to start with
+        for spot in lanes:
+            temp_dist = pythagoras(current_loc[0], current_loc[1], spot.get_x, spot.get_y)
+            if temp_dist < dist:
+                dist = temp_dist
+                nearest = spot
+    else:
+        # centers of two adjacent lane nodes should not be more than 5000km away -> but there is no way for there to be multiple in this range
 
+    return nearest
+
+
+def search(current_loc, targ_loc, cells: list[HoldingLoc], lanes: list[HoldingLoc])->list[[int, tuple(float, float)]]:
+    """
+    Search algorithm to find headings to go towards specified final target location.
     :param current_loc: current plane x,y location
     :param targ_loc:    target plane x,y location
+    :param cells:       list of holdinglocations that we can treat as nodes
     :return: instruction data type, with pairs of headings and distances.
     """
-    
+    """
+    There are a few ways to do this:
+        - we can try to find the shortest line from our current location to our target location, and then move points around such that we
+        do not intersect with any occupied nodes
+        - find the closest open node in an assigned traffic lane and then follow until our target location
+            - in this case, most nodes should be in one of the 4 quadrants, and thus will be assigned to one of the 4 ends of the runways, with
+            each quadrant corresponding to one of the quadrants. This means that traffic should never cross over each other.
+            - each destination is in one quadrant. Search towards that direction
+        - some combination of both where we try to see if there are "shortcuts" that can be made after generating our traffic lane path
+        """
+    # find nearest open node (there should only be 1 within a certain radius of....HOLD_RADIUS+TRAFFIC_MIN_DIST + BUFFER

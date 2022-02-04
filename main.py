@@ -112,6 +112,11 @@ class HoldingLoc():
         self.occupant = None
         self.is_parkable = parkable
 
+    def get_x(self):
+        return self.x
+    def get_y(self):
+        return self.y
+
     def set_full(self, plane_id):
         self.vacant = False
         self.occupant = plane_id
