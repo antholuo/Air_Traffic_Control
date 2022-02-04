@@ -21,6 +21,8 @@ from utils import generate_spots, instructions_to_spot, instructions_to_land, eq
 - queue airplanes based on time of arrival.
 - multithread for data simplicity, nothing we need is heavy enough to need multiprocessing.
 
+- headings are only integers.
+
 =========================================================
 Some assumptions I made:
 - Center of circle is center of the world (0,0) in x,y
@@ -39,13 +41,20 @@ move directly towards the center of the circle?
 - queues planes
 - randomly spawns planes.
 
+Instructions:
+[[heading, location], [heading, location]]
+Fly each heading until you reach a location.
 """
 
 """
 todo:
-- compute number of holding positions available (easy grid problem while maintaining at least one access on each side
-- have atc generate paths to/from holding cells.
-- visualization?
+^ compute number of holding positions available (easy grid problem while maintaining at least one access on each side
+- have atc generate paths
+    - to cells, find nearest inner cell, navigate towards using A*. <- every cell will have some access ring that can be got to.
+    - for landing, generate hop from empty cell to empty cell using A*, then generate straight line to runway end
+- check flight paths inside main while loop.
+
+- visualization? <- probably won't happen
 """
 
 
@@ -127,7 +136,6 @@ class Runway():
         else:
             return "vacant"
 
-
 class Controller():
     # everything talks to the controller, and the controller has complete control over everything (theoretically)
     def __init__(self, radius, planes=[], runway_width=RUNWAY_WIDTH, runway_length=RUNWAY_LENGTH,
@@ -151,10 +159,13 @@ class Controller():
 
     def add_plane(self, plane, id):
         if self.num_spots > 0:
-            plane_instruction_pair = plane, plane.heading, []  # not actually a pair, it consists of the plane, current heading, and future queued instructions.
+            plane_instruction_pair = plane, []  # consists of the plane, and future queued instructions.
             self.planes.append(plane_instruction_pair)  # this makes it easier to assign instructions later
         else:
             plane.update_heading(plane.heading + 180)  # turn around the plane
+
+    def get_planes(self):
+        return self.planes
 
     def try_holding(self, plane, idx, spot):
         self.planes[idx] = plane, instructions_to_spot(plane, spot)
@@ -177,8 +188,7 @@ class Controller():
         for runway in self.runways:
             # todo: add a system to determine closest points from runways, and then check in that priority
             if runway.get_status == "vacant":  # no priority for one runway over another.
-                heading, instructions = instructions_to_land(plane, runway)  # just being explicit
-                self.planes[idx] = plane, heading, instructions
+                self.planes[idx] = plane, instructions_to_land(plane, runway)
                 plane.set_to_land()
         else:
             plane.set_holding()  # continue holding
@@ -186,17 +196,30 @@ class Controller():
         # compute heading
 
 
-def setup():
+def setup() -> Controller:
+    return
+
+def check_flight_paths(planes: list[Plane]):
+    """
+    Checks to make sure that planes are still on the right flight path.
+    Note that planes is a list, and within each list there are three elements:
+        plane, curr heading, instructions.
+    :param planes:
+    :return:
+    """
     return
 
 def main():
     # run setup (creating ATC, finding spots, etc)
     Tower = setup()
+    id = 0
     while(True):
         # main control loop
         if(random() > 0.7):
             # if we're unlucky, we get a new plane in our airspace.
-            generate_plane()
+            Tower.add_plane(generate_plane(), id)
+            id += 1
+        check_flight_paths()
 
 
     return

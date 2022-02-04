@@ -4,6 +4,9 @@
 # Anthony Luo, a26luo@uwaterloo.ca / antholuo@gmail.com
 
 """What this file does:
+
+### CURRENTLY DOES NOT WORK ###
+
 - creates pygame window
 - calculates holding areas with a buffer zone around runways.
 - randomly spawns planes
