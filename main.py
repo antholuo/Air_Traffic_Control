@@ -5,8 +5,10 @@
 
 import math
 import pygame
+import random
 
 from consts import *  # there should be nothing BUT global constants here
+from utils import generate_spots, instructions_to_spot, instructions_to_land, equals, generate_plane
 
 """Some notes to myself:
 - 10hz = 10 times per second
@@ -92,13 +94,14 @@ class Plane():
 
 
 class HoldingLoc():
-    def __init__(self, x, y, vacant=True, radius=HOLD_RADIUS):
+    def __init__(self, x, y, parkable=True, radius=HOLD_RADIUS, vacant=True,):
         self.x = x
         self.y = y
         self.loc = x, y  # not sure if I will need this but might be nice to have in case
         self.vacant = True
         self.radius = HOLD_RADIUS
         self.occupant = None
+        self.is_parkable = parkable
 
     def set_full(self, plane_id):
         self.vacant = False
@@ -108,10 +111,11 @@ class HoldingLoc():
         self.vacant = True
         self.occupant = None
 
+
 class Runway():
     def __init__(self, center, length=RUNWAY_LENGTH, width=RUNWAY_WIDTH):
-        self.North_Target = center + RUNWAY_LENGTH/2
-        self.South_Target = center - RUNWAY_LENGTH/2
+        self.North_Target = center + RUNWAY_LENGTH / 2
+        self.South_Target = center - RUNWAY_LENGTH / 2
         self.in_use = False
 
     def set_in_use(self):
@@ -119,9 +123,10 @@ class Runway():
 
     def get_status(self):
         if self.in_use:
-            return "occupied" # occupied
+            return "occupied"  # occupied
         else:
             return "vacant"
+
 
 class Controller():
     # everything talks to the controller, and the controller has complete control over everything (theoretically)
@@ -133,7 +138,7 @@ class Controller():
         self.runway_width = runway_width
         self.runway_length = runway_length
         self.num_runways = num_runways
-        self.holding_locs = holding_locs
+        self.holding_locs = holding_locs # tuples of places that you can be in
         self.empty_locs = holding_locs
         self.occupied_locs = {}
 
@@ -142,15 +147,14 @@ class Controller():
         self.runways.append(runway)
 
     def rm_runway(self, runway):
-        self.runways.remove(runway) # thankfully python remove lets us remove by value
+        self.runways.remove(runway)  # thankfully python remove lets us remove by value
 
     def add_plane(self, plane, id):
         if self.num_spots > 0:
-            plane_instruction_pair = plane, plane.heading, [] # not actually a pair, it consists of the plane, current heading, and future queued instructions.
-            self.planes.append(plane_instruction_pair) # this makes it easier to assign instructions later
+            plane_instruction_pair = plane, plane.heading, []  # not actually a pair, it consists of the plane, current heading, and future queued instructions.
+            self.planes.append(plane_instruction_pair)  # this makes it easier to assign instructions later
         else:
             plane.update_heading(plane.heading + 180)  # turn around the plane
-
 
     def try_holding(self, plane, idx, spot):
         self.planes[idx] = plane, instructions_to_spot(plane, spot)
@@ -160,8 +164,8 @@ class Controller():
         # assume that if they are within the area of a holding pattern, they can self navigate to spin in circles
         plane_loc = plane.get_location()
         plane.set_holding()
-        spot.set_full(plane.get_id) # sets this spot to be full!
-        self.occupied_locs[plane.get_id] = spot # set this spot to be matched with plane id
+        spot.set_full(plane.get_id)  # sets this spot to be full!
+        self.occupied_locs[plane.get_id] = spot  # set this spot to be matched with plane id
         self.empty_locs.remove(spot)
 
     def try_landing(self, plane, idx):
@@ -170,19 +174,31 @@ class Controller():
         self.empty_locs.append(spot)
         spot.set_vacant
 
-
         for runway in self.runways:
             # todo: add a system to determine closest points from runways, and then check in that priority
-            if runway.get_status == "vacant": # no priority for one runway over another.
-                heading, instructions = instructions_to_land(plane, runway) # just being explicit
+            if runway.get_status == "vacant":  # no priority for one runway over another.
+                heading, instructions = instructions_to_land(plane, runway)  # just being explicit
                 self.planes[idx] = plane, heading, instructions
                 plane.set_to_land()
         else:
-            plane.set_holding() # continue holding
-
+            plane.set_holding()  # continue holding
 
         # compute heading
+
+
+def setup():
+    return
+
 def main():
+    # run setup (creating ATC, finding spots, etc)
+    Tower = setup()
+    while(True):
+        # main control loop
+        if(random() > 0.7):
+            # if we're unlucky, we get a new plane in our airspace.
+            generate_plane()
+
+
     return
 
 
