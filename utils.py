@@ -5,7 +5,7 @@
 
 import math
 
-from main import HoldingLoc, Plane
+from classes import HoldingLoc, Plane
 from consts import *
 
 """utils.py
@@ -73,26 +73,70 @@ def generate_spots() -> list[HoldingLoc]:
 
         generative_radius += RADIUS_STEP
 
-    return spots  # by nature of spots, the closest spots are first in the list.
+    return spots, lanes  # by nature of spots, the closest spots are first in the list.
 
 def find_respective_runway(x, y):
-    runway_x = 0
-    runway_y = 0
-    return runway_x, runway_y
+    """
+    Finds the nearest runway opening quadrant wise. Hardcoded since I'm running out of time.
+    Finds quadrant and maps to respective runway in that quadrant.
+    Could be made to pythagoras and identify nearest runway and factor in things like approach heading, etc.
+    :param x:
+    :param y:
+    :return: tuple of x,y locations to fly to
+    """
+    RUNWAY_LT = -RUNWAY_SPACING/2 - RUNWAY_WIDTH/2, RUNWAY_LENGTH/2
+    RUNWAY_LB = -RUNWAY_SPACING/2 - RUNWAY_WIDTH/2, -RUNWAY_LENGTH/2
+    RUNWAY_RT =  RUNWAY_SPACING/2 + RUNWAY_WIDTH/2, RUNWAY_LENGTH/2
+    RUNWAY_RB =  RUNWAY_SPACING/2 + RUNWAY_WIDTH/2, -RUNWAY_LENGTH/2
 
-def instructions_to_land(plane, runway):
+    if x>=0 and y>=0:
+        return RUNWAY_RT
+    elif x>=0 and y<=0:
+        return RUNWAY_RB
+    elif x<=0 and y<=0:
+        return RUNWAY_LB
+    elif x<=0 and y>=0:
+        return RUNWAY_RT
+    else:
+        # some sort of emergency I guess? To be dealt with later.
+        return 0,0
+
+def instructions_to_land(plane, runway, lanes):
     # find nearest runway opening
-    # navigate heading to line up with runway.
-    # once on runway heading, land plane.
-    return
+    # find nearest lane node to heading.
+    # set final destination reasonable distance (90 degrees from landing heading) intersecting with final lane node.
+    # use a special search that computes how close we are to the centerline instead of an absolute.
+    targ_loc = 0,0
+    if pythagoras(runway.get_centerline(), runway.get_northtarget(), plane.get_location[0], plane.get_location[1]) < pythagoras(runway.get_centerline(), runway.get_southtarget(), plane.get_location[0], plane.get_location[1]):
+        targ_loc = runway.get_centerline(), runway.get_northtarget + 3000 # adding some distance so that the system is not messed up
+    else:
+        targ_loc = runway.get_centerline(), runway.get_southtarget - 3000
+
+    current_loc = plane.get_location()
+
+    return search(current_loc, targ_loc, lanes)
 
 
-def instructions_to_spot(plane, spot):
-    # instead of trying to find the paths that the plane fits through (since it has a minimum gflying distance),
-    # take radius of all objects and increase that and then run A*.
-    return
+def instructions_to_spot(plane, spot, lanes):
+    """
+    Wrapper for search() function (makes it easier to call in our code).
+    :param plane:
+    :param spot:
+    :param lanes:
+    :return:
+    """
+    current_loc = plane.get_location()
+    targ_loc = spot.get_x, spot.get_y
+    return search(current_loc, targ_loc, lanes)
 
 def find_nearest_lane_node(lanes: list[HoldingLoc], current_loc = (0,0), destination = None) -> HoldingLoc:
+    """
+    Finds the nearest node designated to be used for air traffic movement
+    :param lanes:
+    :param current_loc:
+    :param destination:
+    :return:
+    """
     if destination == None:
         # just looking for the nearest lane node to begin with
             # -> can be optimized further to  find lane node in specific direction.
@@ -124,10 +168,10 @@ def compute_heading(x1, y1, x2, y2) -> int:
     degs = math.atan((x2-x1), (y2-y1)) / (math.pi * 180)
     if degs < 0:
         degs += 360
-    return degs
+    return math.round(degs)
 
 
-def search(current_loc, targ_loc, cells: list[HoldingLoc], lanes: list[HoldingLoc])->list[[int, tuple(float, float)]]:
+def search(current_loc, targ_loc, lanes: list[HoldingLoc], landing = False)->list[[int, tuple]]:
     """
     Search algorithm to find headings to go towards specified final target location.
     :param current_loc: current plane x,y location
@@ -149,11 +193,18 @@ def search(current_loc, targ_loc, cells: list[HoldingLoc], lanes: list[HoldingLo
     # find nearest open node (there should only be 1 within a certain radius of....HOLD_RADIUS+TRAFFIC_MIN_DIST + BUFFER
     path = []
     cell = find_nearest_lane_node(lanes, current_loc, targ_loc) # start with our first cell
-    path.append(cell, compute_heading(current_loc[0], current_loc[1], cell.get_x, cell.get_y))
-    while(pythagoras(cell.get_x, cell.get_y, targ_loc[0], targ_loc[1]) > 2200):
+    path.append(compute_heading(current_loc[0], current_loc[1], cell.get_x, cell.get_y), cell.get_x, cell.get_y)
+    while( ((pythagoras(cell.get_x, cell.get_y, targ_loc[0], targ_loc[1]) > 2200) and landing==False) or ((math.abs(cell.get_x - targ_loc[0]) > 2200) and landing==True)):
         # while we are not yet at the final approach landing state
         next = find_nearest_lane_node(lanes, cell.get_x, cell.get_y, targ_loc[0], targ_loc[1])
-        path.append(next, compute_heading(cell.get_x, cell.get_y, next.get_x, next.get_y))
-        cell = next
+        path.append(compute_heading(cell.get_x, cell.get_y, next.get_x, next.get_y), next.get_x, next.get_y)
+        cell = next # there should be no issue with this. See test1 in test.py
+
+    if landing:
+        # add final path to landing.
+        # cell should still be our final cell.
+        # we maintain our cell_y, but move x target to the centerline of the runway
+        path.append(compute_heading(cell.get_x, cell.get_y, targ_loc[0], cell.get_y), targ_loc[0], cell.get_y)
+        path.append(compute_heading(targ_loc[0], cell.get_y, targ_loc[0], 0), 0, 0) # final landing path to center of runway
 
     return path

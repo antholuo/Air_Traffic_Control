@@ -1,14 +1,17 @@
 # SpaceRyde Internship Coding Challenge
-# main.py
+# classes.py
 # Februry 2022
 # Anthony Luo, a26luo@uwaterloo.ca / antholuo@gmail.com
 
 import math
 import pygame
 import random
+import numpy as np
 
 from consts import *  # there should be nothing BUT global constants here
-from utils import generate_spots, instructions_to_spot, instructions_to_land, equals, generate_plane
+from classes import *
+from utils import *
+from visualization import *
 
 """Some notes to myself:
 - 10hz = 10 times per second
@@ -58,88 +61,6 @@ todo:
 """
 
 
-class Plane():
-    def __init__(self, id, degrees):
-        self.id = id
-        self.x = math.cos(degrees)
-        self.y = math.sin(degrees)
-        self.heading = 180 + (90 - degrees)  # global heading.
-        self.state = 0;
-
-        """States for the plane:
-        0: entering our airspace
-        1: guided towards holding location
-        2: holding
-        3: guided towards landing target
-        4: landed/landing"""
-
-    def update_heading(self, heading):
-        self.heading = heading
-
-    def update_location(self):
-        self.x = self.x + math.sin(self.heading) * AIRSPEED
-        self.y = self.y + math.cos(self.heading) * AIRSPEED
-
-    def get_location(self):
-        return self.x, self.y
-
-    def get_id(self):
-        return self.id
-
-    def get_state(self):
-        return self.state
-
-    def set_holding(self):
-        self.state = 2
-
-    def set_to_hold(self):
-        self.state = 1
-
-    def set_to_land(self):
-        self.state = 3
-
-    def set_landed(self):
-        self.state = 4
-
-
-class HoldingLoc():
-    def __init__(self, x, y, parkable=True, radius=HOLD_RADIUS, vacant=True,):
-        self.x = x
-        self.y = y
-        self.loc = x, y  # not sure if I will need this but might be nice to have in case
-        self.vacant = True
-        self.radius = HOLD_RADIUS
-        self.occupant = None
-        self.is_parkable = parkable
-
-    def get_x(self):
-        return self.x
-    def get_y(self):
-        return self.y
-
-    def set_full(self, plane_id):
-        self.vacant = False
-        self.occupant = plane_id
-
-    def set_vacant(self):
-        self.vacant = True
-        self.occupant = None
-
-
-class Runway():
-    def __init__(self, center, length=RUNWAY_LENGTH, width=RUNWAY_WIDTH):
-        self.North_Target = center + RUNWAY_LENGTH / 2
-        self.South_Target = center - RUNWAY_LENGTH / 2
-        self.in_use = False
-
-    def set_in_use(self):
-        self.in_use = True
-
-    def get_status(self):
-        if self.in_use:
-            return "occupied"  # occupied
-        else:
-            return "vacant"
 
 class Controller():
     # everything talks to the controller, and the controller has complete control over everything (theoretically)
@@ -151,8 +72,8 @@ class Controller():
         self.runway_width = runway_width
         self.runway_length = runway_length
         self.num_runways = num_runways
-        self.holding_locs = holding_locs # tuples of places that you can be in
-        self.empty_locs = holding_locs
+        self.holding_locs, self.lanes = holding_locs # tuples of places that you can be in
+        self.empty_locs = holding_locs[0]
         self.occupied_locs = {}
 
     def add_runway(self, runway):
@@ -173,7 +94,7 @@ class Controller():
         return self.planes
 
     def try_holding(self, plane, idx, spot):
-        self.planes[idx] = plane, instructions_to_spot(plane, spot)
+        self.planes[idx] = plane, instructions_to_spot(plane, spot, self.lanes)
 
     def hold_plane(self, plane, spot):
         # plane is already in position to hold
@@ -202,6 +123,7 @@ class Controller():
 
 
 def setup() -> Controller:
+    # add runways
     return
 
 def check_flight_paths(planes: list[Plane]):
@@ -220,11 +142,11 @@ def main():
     id = 0
     while(True):
         # main control loop
-        if(random() > 0.7):
+        if(np.random.rand() > 0.7):
             # if we're unlucky, we get a new plane in our airspace.
             Tower.add_plane(generate_plane(), id)
             id += 1
-        check_flight_paths()
+        check_flight_paths(Tower.planes)
 
 
     return

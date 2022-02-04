@@ -12,3 +12,14 @@ def test1():
 
     for objekt in mylist:
         print(objekt.val)
+
+def test2():
+    # does not work
+    while(
+        if (a == True):
+            i > 3
+        else
+            i >4
+    ):
+            print(i)
+            i +=1
