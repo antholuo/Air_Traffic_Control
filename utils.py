@@ -117,6 +117,15 @@ def find_nearest_lane_node(lanes: list[HoldingLoc], current_loc = (0,0), destina
 
     return nearest
 
+def compute_heading(x1, y1, x2, y2) -> int:
+    # computes the heading that you need to fly to get from x1, y1 to x2, y2
+    # we know x1, y1, x2, y2. This gives all sides of the triangle? tan = opp/adj, = x2-x1 / y2-y1
+
+    degs = math.atan((x2-x1), (y2-y1)) / (math.pi * 180)
+    if degs < 0:
+        degs += 360
+    return degs
+
 
 def search(current_loc, targ_loc, cells: list[HoldingLoc], lanes: list[HoldingLoc])->list[[int, tuple(float, float)]]:
     """
@@ -135,5 +144,16 @@ def search(current_loc, targ_loc, cells: list[HoldingLoc], lanes: list[HoldingLo
             each quadrant corresponding to one of the quadrants. This means that traffic should never cross over each other.
             - each destination is in one quadrant. Search towards that direction
         - some combination of both where we try to see if there are "shortcuts" that can be made after generating our traffic lane path
+        - we can also map everything as a graph....
         """
     # find nearest open node (there should only be 1 within a certain radius of....HOLD_RADIUS+TRAFFIC_MIN_DIST + BUFFER
+    path = []
+    cell = find_nearest_lane_node(lanes, current_loc, targ_loc) # start with our first cell
+    path.append(cell, compute_heading(current_loc[0], current_loc[1], cell.get_x, cell.get_y))
+    while(pythagoras(cell.get_x, cell.get_y, targ_loc[0], targ_loc[1]) > 2200):
+        # while we are not yet at the final approach landing state
+        next = find_nearest_lane_node(lanes, cell.get_x, cell.get_y, targ_loc[0], targ_loc[1])
+        path.append(next, compute_heading(cell.get_x, cell.get_y, next.get_x, next.get_y))
+        cell = next
+
+    return path
