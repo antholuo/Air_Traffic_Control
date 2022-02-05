@@ -93,25 +93,19 @@ class Controller():
         return self.planes
 
     def get_first_plane(self):
-        return self.planes[0], self.planes[0].get_id()
+        return self.planes[0][0], self.planes[0][0].get_id()
 
     def try_holding(self, plane, idx, spot):
         self.planes[idx] = plane, instructions_to_spot(plane, spot, self.lanes)
+
 
     def hold_plane(self, plane, spot):
         # plane is already in position to hold
         # assume that if they are within the area of a holding pattern, they can self navigate to spin in circles
         plane_loc = plane.get_location()
         plane.set_holding()
-        spot.set_full(plane.get_id)  # sets this spot to be full!
-        self.occupied_locs[plane.get_id] = spot  # set this spot to be matched with plane id
-        self.empty_locs.remove(spot)
 
     def try_landing(self, plane, idx):
-        spot = self.occupied_locs[plane.get_id]
-        self.occupied_locs.pop(plane.get_id)
-        self.empty_locs.append(spot)
-        spot.set_vacant
 
         for runway in self.runways:
             # todo: add a system to determine closest points from runways, and then check in that priority
@@ -184,7 +178,7 @@ def main():
             Tower.try_holding(newplane, id, find_nearest_spot(Tower.holding_locs, id))
             id += 1
 
-        if (check_flight_paths(Tower.get_planes()) < 4):
+        if (check_flight_paths(Tower.get_planes()) < 4) and len(Tower.get_planes()) > 0:
             plane, id = Tower.get_first_plane()
             Tower.try_landing(plane, id)  # land the next plane in the queue
     return "Day over good job!"

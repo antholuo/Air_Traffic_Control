@@ -14,7 +14,12 @@ Contains utilities such as: calculating collisions, determining number of parkin
 
 
 def pythagoras(x1, y1, x2, y2):
-    return round(math.sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2))  # just to return nearest int of pythagoras distance
+    deltax = x1 - x2
+    deltay = y1 - y2
+
+    deltax = deltax * deltax
+    deltay = deltay * deltay
+    return round(math.sqrt(deltax + deltay))  # just to return nearest int of pythagoras distance
 
 
 def equals(loc1, loc2) -> bool:
@@ -142,7 +147,7 @@ def instructions_to_spot(plane, spot, lanes):
     :return:
     """
     current_loc = plane.get_location()
-    targ_loc = spot.get_x, spot.get_y
+    targ_loc = spot.get_x(), spot.get_y()
     return search(current_loc, targ_loc, lanes)
 
 
@@ -160,7 +165,7 @@ def find_nearest_lane_node(lanes: list[HoldingLoc], current_loc=(0, 0), destinat
         nearest = lanes[0]
         dist = 22000  # unreasonably large number to start with
         for spot in lanes:
-            temp_dist = pythagoras(current_loc[0], current_loc[1], spot.get_x, spot.get_y)
+            temp_dist = pythagoras(current_loc[0], current_loc[1], spot.get_x(), spot.get_y())
             if temp_dist < dist:
                 dist = temp_dist
                 nearest = spot
@@ -169,8 +174,8 @@ def find_nearest_lane_node(lanes: list[HoldingLoc], current_loc=(0, 0), destinat
         nearest = lanes[0]
         dist = 22000  # large distance to start with
         for spot in lanes:
-            temp_dist = pythagoras(current_loc[0], current_loc[1], spot.get_x, spot.get_y)
-            dist_to_dest = pythagoras(destination[0], destination[1], spot.get_x, spot.get_y)
+            temp_dist = pythagoras(current_loc[0], current_loc[1], spot.get_x(), spot.get_y())
+            dist_to_dest = pythagoras(destination[0], destination[1], spot.get_x(), spot.get_y())
             if temp_dist < 5000 and dist_to_dest < dist:
                 dist = temp_dist
                 nearest = spot
@@ -191,10 +196,10 @@ def compute_heading(x1, y1, x2, y2) -> int:
     # computes the heading that you need to fly to get from x1, y1 to x2, y2
     # we know x1, y1, x2, y2. This gives all sides of the triangle? tan = opp/adj, = x2-x1 / y2-y1
 
-    degs = math.atan((x2 - x1), (y2 - y1)) / (math.pi * 180)
+    degs = math.atan((x2 - x1) / (y2 - y1)) / (math.pi * 180)
     if degs < 0:
         degs += 360
-    return math.round(degs)
+    return round(degs)
 
 
 def search(current_loc, targ_loc, lanes: list[HoldingLoc], landing=False) -> list[[int, tuple]]:
@@ -219,20 +224,22 @@ def search(current_loc, targ_loc, lanes: list[HoldingLoc], landing=False) -> lis
     # find nearest open node (there should only be 1 within a certain radius of....HOLD_RADIUS+TRAFFIC_MIN_DIST + BUFFER
     path = []
     cell = find_nearest_lane_node(lanes, current_loc, targ_loc)  # start with our first cell
-    path.append(compute_heading(current_loc[0], current_loc[1], cell.get_x, cell.get_y), cell.get_x, cell.get_y)
-    while (((pythagoras(cell.get_x, cell.get_y, targ_loc[0], targ_loc[1]) > 2200) and landing == False) or (
-            (math.abs(cell.get_x - targ_loc[0]) > 2200) and landing == True)):
+    path.append(
+        (compute_heading(current_loc[0], current_loc[1], cell.get_x(), cell.get_y()), cell.get_x(), cell.get_y()))
+    while (((pythagoras(cell.get_x(), cell.get_y(), targ_loc[0], targ_loc[1]) > 2200) and landing == False) or (
+            (np.abs(cell.get_x() - targ_loc[0]) > 2200) and landing == True)):
         # while we are not yet at the final approach landing state
-        next = find_nearest_lane_node(lanes, cell.get_x, cell.get_y, targ_loc[0], targ_loc[1])
-        path.append(compute_heading(cell.get_x, cell.get_y, next.get_x, next.get_y), next.get_x, next.get_y)
+        next = find_nearest_lane_node(lanes, cell.get_x(), cell.get_y(), targ_loc[0], targ_loc[1])
+        path.append(
+            (compute_heading(cell.get_x(), cell.get_y(), next.get_x(), next.get_y()), next.get_x(), next.get_y()))
         cell = next  # there should be no issue with this. See test1 in test.py
 
     if landing:
         # add final path to landing.
         # cell should still be our final cell.
         # we maintain our cell_y, but move x target to the centerline of the runway
-        path.append(compute_heading(cell.get_x, cell.get_y, targ_loc[0], cell.get_y), targ_loc[0], cell.get_y)
-        path.append(compute_heading(targ_loc[0], cell.get_y, targ_loc[0], 0), 0,
-                    0)  # final landing path to center of runway
+        path.append((compute_heading(cell.get_x(), cell.get_y(), targ_loc[0], cell.get_y()), targ_loc[0], cell.get_y()))
+        path.append((compute_heading(targ_loc[0], cell.get_y(), targ_loc[0], 0), 0,
+                     0))  # final landing path to center of runway
 
     return path
