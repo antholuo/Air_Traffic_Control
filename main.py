@@ -185,6 +185,6 @@ def main():
     # run setup (creating ATC, finding spots, etc)
     Tower = setup()
     Tower.run()
-    
+
 if __name__ == "__main__":
     main()

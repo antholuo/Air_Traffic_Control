@@ -36,11 +36,25 @@ In the end, there was an attempt to maintain as-close to realistic scenarios as 
 - Planes should land roughly collinear to the runway
 - Distances are described in x-y instead of latittude and longitude. At this distance, it may start to matter but a translational function could allow the conversion between lat/lon and x/y fairly easily.
 ## Structuring The Code
-Originally, I attempted to make an ROS implementation, but quickly realized that it was not feasible within the constrained timeframe (especially since I did not want this to take any longer than it needed to). Then I turned to my next idea, make every object a class, and have our main controller handle all the interactions.
+Originally, I attempted to make an ROS implementation, but quickly realized that it was not feasible within the constrained timeframe (especially since I did not want this to take any longer than it needed to). Then I turned to my next idea, make every object a class, and have our main controller handle all the interactions. This means that each plane, runway, has it's own potential for decision making, but the Controller is responsible for delegating instructions and usages to each of those objects.
 ### The Controller Class
-
+Fundamentally, the controller class handles all function pertinent to the function of the airport. It can be initialized once and never again, or initialized everyday when the airport wakes up. Runways, planes, etc can be changed on the fly, as you might have in real life scenarios where weather conditions remove runways or new planes enter/leave our airspace.
 ### The Plane, HoldingLoc, and Runway Classes
+>**`class Plane`**:
+The Plane class is designed to be a plane. It transmits locations, it tells the ATC what it's intentions (`state`) is, and otherwise flies as it has been told to do. We assume that when a plane is holding, the plane does not need constant instructions from the ATC.
 
+Summary: Plane class holds and operates a single plane
+
+>**`class HoldingLoc`**:
+The HoldingLoc class is interesting in the sense that it does not need to exist, but exists merely as a way to define definitive holding locations. It can hold a single plan, covers a single area of the specified holding radius, and allows multiple classes to interact and communicate effectively. It can be replaced with a list, dictionary, or any other data type, but we've chosen to make it a class simply for simplicity when coding. For example, if we're trying to get the state and id
+```Python
+myHoldingLoc.getStateAndId() # clear (albiet slightly more complicated in the class definition)
+myHoldingLoc[index][state_location], HoldingLoc[index][id_location] # very confusing when we start to have multiple HoldingLoc
+```
+Summary: HoldingLoc defines a holding position for one plane. Can functionally be any type, is a class for simplicity.
+
+> **`class Runway`**:
+Similar to the HoldingLoc class, there is no need for the runway class to exist, other than to make our life simple and subscriptable.
 ## Putting it Together
 
 ### The Good
