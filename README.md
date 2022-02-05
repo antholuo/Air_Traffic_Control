@@ -1,5 +1,5 @@
 # SpaceRyde ATC Challenge
-Hi there! My name is Anthony Luo and this is my submission for the SpaceRyde ATC Challenge. Thanks so much for taking the time to look at my submission 
+Hi there! My name is Anthony Luo and this is my submission for the SpaceRyde ATC Challenge. Thanks so much for taking the time to look at my submission.
 
 The code was written in Python, simply because of the simplicity and speed with which it was possible to finish the challenge. Functionally, the code should be able to translate to C++ as we make use of many of the same fundamental concepts. There are multiple files, so skip to [Putting it Together](#putting-it-together) to get a proper breakdown of the code structure.
 
@@ -69,7 +69,7 @@ There are a few different files that have been used, I'll list them all (in no p
 - **test.py** : Testing file used to verify functionality of some Python elements.
 - **visualization.py** : Non-functional attempt at visualization.
 
-> **_Note_**: Throughout the entire project, there was no conceited attempt at structuring the code. I spent a bit of time architecting everything and placed function where I think they should be, and if I were to continue this project I would start to add subdirectories, splitting up files (especially utils.py and my classes), just to make everything clearer. For now though, fewer files == more simplicity.
+> **_Note_**: Throughout the entire project, there was no concerted attempt at structuring the code. I spent a bit of time architecting everything and placed function where I think they should be, and if I were to continue this project I would start to add subdirectories, splitting up files (especially utils.py and my classes), just to make everything clearer. For now though, fewer files == more simplicity.
 
 **Code runs in the following steps:**
 1) Tower is initialized with global parameters
