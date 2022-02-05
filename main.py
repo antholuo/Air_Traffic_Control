@@ -117,6 +117,22 @@ class Controller():
 
         # compute heading
 
+    def run(self):
+        id = 0
+        while (True):
+            # main control loop
+            if (np.random.rand() > 0.7):
+                # if we're unlucky, we get a new plane in our airspace.
+                newplane = generate_plane(id)
+                self.add_plane(newplane, id)
+                self.try_holding(newplane, id, find_nearest_spot(self.holding_locs, id))
+                id += 1
+
+            if (check_flight_paths(self.get_planes()) < 4) and len(self.get_planes()) > 0:
+                plane, id = self.get_first_plane()
+                self.try_landing(plane, id)  # land the next plane in the queue
+        return "Day over good job!"
+
 
 def setup() -> Controller:
     # starts up our controller
@@ -168,21 +184,7 @@ def check_flight_paths(planes):
 def main():
     # run setup (creating ATC, finding spots, etc)
     Tower = setup()
-    id = 0
-    while (True):
-        # main control loop
-        if (np.random.rand() > 0.7):
-            # if we're unlucky, we get a new plane in our airspace.
-            newplane = generate_plane(id)
-            Tower.add_plane(newplane, id)
-            Tower.try_holding(newplane, id, find_nearest_spot(Tower.holding_locs, id))
-            id += 1
-
-        if (check_flight_paths(Tower.get_planes()) < 4) and len(Tower.get_planes()) > 0:
-            plane, id = Tower.get_first_plane()
-            Tower.try_landing(plane, id)  # land the next plane in the queue
-    return "Day over good job!"
-
-
+    Tower.run()
+    
 if __name__ == "__main__":
     main()
