@@ -61,18 +61,17 @@ todo:
 """
 
 
-
 class Controller():
     # everything talks to the controller, and the controller has complete control over everything (theoretically)
-    def __init__(self, radius, planes=[], runway_width=RUNWAY_WIDTH, runway_length=RUNWAY_LENGTH,
+    def __init__(self, radius, runway_width=RUNWAY_WIDTH, runway_length=RUNWAY_LENGTH,
                  num_runways=NUM_RUNWAYS, holding_locs=[]):
         self.radius = radius
-        self.planes = planes  # in case there are existing planes which need to be handled
+        self.planes = []  # in case there are existing planes which need to be handled
         self.runways = []
         self.runway_width = runway_width
         self.runway_length = runway_length
         self.num_runways = num_runways
-        self.holding_locs, self.lanes = holding_locs # tuples of places that you can be in
+        self.holding_locs, self.lanes = holding_locs  # tuples of places that you can be in
         self.empty_locs = holding_locs[0]
         self.occupied_locs = {}
 
@@ -84,14 +83,17 @@ class Controller():
         self.runways.remove(runway)  # thankfully python remove lets us remove by value
 
     def add_plane(self, plane, id):
-        if self.num_spots > 0:
-            plane_instruction_pair = plane, []  # consists of the plane, and future queued instructions.
+        if len(self.empty_locs) > 0:
+            plane_instruction_pair = plane, [],  # consists of the plane, and future queued instructions.
             self.planes.append(plane_instruction_pair)  # this makes it easier to assign instructions later
         else:
             plane.update_heading(plane.heading + 180)  # turn around the plane
 
     def get_planes(self):
         return self.planes
+
+    def get_first_plane(self):
+        return self.planes[0], self.planes[0].get_id()
 
     def try_holding(self, plane, idx, spot):
         self.planes[idx] = plane, instructions_to_spot(plane, spot, self.lanes)
@@ -123,10 +125,21 @@ class Controller():
 
 
 def setup() -> Controller:
-    # add runways
-    return
+    # starts up our controller
 
-def check_flight_paths(planes: list[Plane]):
+    horiz = RUNWAY_WIDTH / 2 + RUNWAY_SPACING / 2
+    center = horiz, 0
+    runway1 = Runway(center)
+    center = -horiz, 0
+    runway2 = Runway(center)
+
+    Tower = Controller(ATC_RADIUS, holding_locs=generate_spots())
+    Tower.add_runway(runway1)
+    Tower.add_runway(runway2)
+    return Tower
+
+
+def check_flight_paths(planes):
     """
     Checks to make sure that planes are still on the right flight path.
     Note that planes is a list, and within each list there are three elements:
@@ -134,22 +147,47 @@ def check_flight_paths(planes: list[Plane]):
     :param planes:
     :return:
     """
-    return
+    in_flight = 0
+    for flier in planes:
+        if flier[0].get_state() == 4:
+            planes.remove(flier)  # remove any landed planes
+        if flier[0].get_state() == 3:  # in flight
+            if (equals(flier[0].get_location(), flier[1][0][1])):
+                flier[1].pop()  # removes first/current instruction from the list.
+                if (flier[1][0][0]):  # if there is a new instruction
+                    flier[0].update_heading(flier[1][0][0])  # sets new heading
+                else:
+                    flier[0].set_landed()  # no more instructions, we have landed?
+            in_flight += 1
+        if flier[0].get_state() == 1:  # to hold
+            if (equals(flier[0].get_location(), flier[1][0][1])):
+                flier[1].pop()  # removes first/current instruction from the list.
+                if (flier[1][0][0]):  # if there is a new instruction
+                    flier[0].update_heading(flier[1][0][0])  # sets new heading
+                else:
+                    flier[0].set_holding()  # no more instructions, we have reached holding cell?
+            in_flight += 1
+
+    return in_flight
+
 
 def main():
     # run setup (creating ATC, finding spots, etc)
     Tower = setup()
     id = 0
-    while(True):
+    while (True):
         # main control loop
-        if(np.random.rand() > 0.7):
+        if (np.random.rand() > 0.7):
             # if we're unlucky, we get a new plane in our airspace.
-            Tower.add_plane(generate_plane(), id)
+            newplane = generate_plane(id)
+            Tower.add_plane(newplane, id)
+            Tower.try_holding(newplane, id, find_nearest_spot(Tower.holding_locs, id))
             id += 1
-        check_flight_paths(Tower.planes)
 
-
-    return
+        if (check_flight_paths(Tower.get_planes()) < 4):
+            plane, id = Tower.get_first_plane()
+            Tower.try_landing(plane, id)  # land the next plane in the queue
+    return "Day over good job!"
 
 
 if __name__ == "__main__":

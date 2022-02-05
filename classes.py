@@ -63,7 +63,7 @@ class Plane():
         self.x = math.cos(degrees)
         self.y = math.sin(degrees)
         self.heading = 180 + (90 - degrees)  # global heading.
-        self.state = 0;
+        self.state = 0
 
         """States for the plane:
         0: entering our airspace
@@ -102,7 +102,7 @@ class Plane():
 
 
 class HoldingLoc():
-    def __init__(self, x, y, parkable=True, radius=HOLD_RADIUS, vacant=True,):
+    def __init__(self, x, y, parkable=True, radius=HOLD_RADIUS, vacant=True, ):
         self.x = x
         self.y = y
         self.loc = x, y  # not sure if I will need this but might be nice to have in case
@@ -113,12 +113,16 @@ class HoldingLoc():
 
     def get_x(self):
         return self.x
+
     def get_y(self):
         return self.y
 
     def set_full(self, plane_id):
         self.vacant = False
         self.occupant = plane_id
+
+    def is_vacant(self):
+        return self.vacant
 
     def set_vacant(self):
         self.vacant = True
