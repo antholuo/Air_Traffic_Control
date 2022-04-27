@@ -1,5 +1,5 @@
 # SpaceRyde ATC Challenge
-Hi there! My name is Anthony Luo and this is my submission for the SpaceRyde ATC Challenge. Thanks so much for taking the time to look at my submission.
+Hi there! My name is Anthony Luo and you're looking at Version 1.0 of submission for the SpaceRyde ATC Challenge (Released February 2022). This version is new deprecated, but feel free to look around!
 
 The code was written in Python, simply because of the simplicity and speed with which it was possible to finish the challenge. Functionally, the code should be able to translate to C++ as we make use of many of the same fundamental concepts. There are multiple files, so skip to [Putting it Together](#putting-it-together) to get a proper breakdown of the code structure.
 
