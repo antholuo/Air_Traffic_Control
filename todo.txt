@@ -6,14 +6,39 @@ Revision 2: (Following Space Ryde Guidelines) April 2022 - TBD
 Summary:    - Some visualization
             - Follows guidelines (nothing more)
             - Doesn't implement RTOS, but uses RTOS model?
-            - Tries to use multithreading
+            - Tries to use multithreading.
+            - Planes can fly at all sorts of angles (not realistic).
+            - All planes fly at the same altitude (2d view, no queueing on top of each other).
 
 System Design
 ---------------------------
 - Plane Class - contains each plane and allows it to function independently.
               - Shouts if airspace is violated (safe distance limit violated). -> might be super costly to check?
                                                                                   (add as build flag?)
-              - Is a state machine? (not for any reason, just because it's cool)
+              - Is a state machine?: - contact tower
+                                     - fly path
+                                     - hold
+                                     - land
+                                     - return position
+                                     - return intent (ie emergencies? if we make)
+
+- Tower Class - Is our "controller"
+              - Contains multiple states/threads: - accept plane    -> interrupt to add a plane to queue
+                                                  - queue landing(s)-> updates our queue
+                                                        - shuffles planes to which runway they should be landing on
+                                                        - does not handle last plane.
+                                                  - land plane      -> if plane is close and next, land
+                                                        - creates a no-fly zone with landing path.
+                                                  - generate paths  -> gives planes instructions.
+                                                        - generates paths CONSTANTLY to avoid collisions & max space
+
+- Watchman class - Is the "god" of our project.
+    - generates planes (randomly)
+    - creates random accidents/emergencies (maybe)
+    - runs in own thread
+
+- Vizualizer - Is the display for our thing
+    - runs in own thread. (constant speed -> hopefully).
 
 Visualization:
 ---------------------------
@@ -36,7 +61,8 @@ Path Generation
     - take into account which runway is closest // how many planes are queue'd at each entrance/exit...
         - Find runway opening that has the least number of "next" planes? (make an "educated guess?")
             > but this might not even get assigned until later...
-
+    > could use a greedy algorithm, queue all planes towards "holding zone" near runway, and de-queue as necessary?
+        (either to land or to put in a different location).
 
 Revision 1: (Following Space Ryde Guidelines) January 2022 - February 2022
 ==============================================================================
