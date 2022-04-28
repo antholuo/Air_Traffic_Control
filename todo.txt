@@ -1,0 +1,45 @@
+ATC Challenge
+Anthony Luo, 2022.
+
+Revision 2: (Following Space Ryde Guidelines) April 2022 - TBD
+==============================================================================
+Summary:    - Some visualization
+            - Follows guidelines (nothing more)
+            - Doesn't implement RTOS, but uses RTOS model?
+            - Tries to use multithreading
+
+System Design
+---------------------------
+- Plane Class - contains each plane and allows it to function independently.
+              - Shouts if airspace is violated (safe distance limit violated). -> might be super costly to check?
+                                                                                  (add as build flag?)
+              - Is a state machine? (not for any reason, just because it's cool)
+
+Visualization:
+---------------------------
+- Pygame?
+- run in seperate thread at steady rate?
+- have different views
+    - allow us to zoom in an follow one specific plane -> show list of planes on the side that we can click to
+    - allow us to see the whole map?                   -> Show map in the corner always, clicking on it brings it up
+- draw planes                                           > might just be points.
+- draw thin radius around planes (show safe distance)   > thin white? << might not even be visible
+- draw radius of controller                             > outlined in thicker white?
+- draw runways?                                         > outlined in thicker white?
+- draw predicted paths?                                 > red/orange - long dashed?
+
+Path Generation
+---------------------------
+- Take next <num_runways> of planes and queue them to nearest runway
+- Queue next number of planes to have most efficient path to runway?
+    > the idea here is to minimise the amount of time spent in a holding pattern.
+    - take into account which runway is closest // how many planes are queue'd at each entrance/exit...
+        - Find runway opening that has the least number of "next" planes? (make an "educated guess?")
+            > but this might not even get assigned until later...
+
+
+Revision 1: (Following Space Ryde Guidelines) January 2022 - February 2022
+==============================================================================
+- basic queue system.
+- assigned slots
+- no visualization
