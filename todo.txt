@@ -9,6 +9,7 @@ Summary:    - Some visualization
             - Tries to use multithreading.
             - Planes can fly at all sorts of angles (not realistic).
             - All planes fly at the same altitude (2d view, no queueing on top of each other).
+            - uses x/y lat/lon (not proper degrees)
 
 System Design
 ---------------------------
@@ -31,6 +32,8 @@ System Design
                                                         - creates a no-fly zone with landing path.
                                                   - generate paths  -> gives planes instructions.
                                                         - generates paths CONSTANTLY to avoid collisions & max space
+
+- Airfield Class - Designs our airfield.
 
 - Watchman class - Is the "god" of our project.
     - generates planes (randomly)
