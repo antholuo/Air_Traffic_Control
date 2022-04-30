@@ -1,0 +1,6 @@
+
+Dealing with lat/lon
+https://www.igismap.com/formula-to-find-bearing-or-heading-angle-between-two-points-latitude-longitude/
+
+Dealing with FSM
+https://learn.adafruit.com/circuitpython-101-state-machines?view=all

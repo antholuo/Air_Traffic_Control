@@ -8,7 +8,7 @@ class Tower:
         self.tower_id = 0;
         self.airfield = airfield;
 
-    def land_plane(self, plane):
+    def landPlane(self, plane):
         #handles the last vectors for the plane.
         # finds nearest landing strip endpoint
         dist = sys.maxsize
@@ -23,10 +23,10 @@ class Tower:
             else:
                 dist = dist1
                 x, y = runway.x, runway.y_edges[0]
-        self.gen_landing_path(plane, (x,y))
+        self.genLandingPath(plane, (x,y))
         return
 
-    def gen_landing_path(self, plane, loc):
+    def genLandingPath(self, plane, loc):
         # futur: make it so that this will draw a nice spline.
         # for now, this creates a heading for the plane to fly.
         x,y = loc

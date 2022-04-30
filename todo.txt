@@ -9,7 +9,7 @@ Summary:    - Some visualization
             - Tries to use multithreading.
             - Planes can fly at all sorts of angles (not realistic).
             - All planes fly at the same altitude (2d view, no queueing on top of each other).
-            - uses x/y lat/lon (not proper degrees)
+            - maybe we try using proper lat/lon?
 
 System Design
 ---------------------------
