@@ -9,8 +9,10 @@
 
 import threading
 
+from Visualization import visualizer_main
+
 def start_atc():
-    # visualization = threading.Thread(target=run_visualization, args=())
+    # visualization = threading.Thread(target=visualizer_main.run_visualization, args=())
 
     # visualization.start();
 
