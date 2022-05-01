@@ -10,7 +10,8 @@ Summary:    - Some visualization
             - Planes can fly at all sorts of angles (not realistic).
             - Planes fly at a constant speed the entire time
             - All planes fly at the same altitude (2d view, no queueing on top of each other).
-            - maybe we try using proper lat/lon?
+            - maybe we try using proper lat/lon in degrees -> need -90 to +90
+            - note that heading in radians? -> why radians
 
 System Design
 ---------------------------
