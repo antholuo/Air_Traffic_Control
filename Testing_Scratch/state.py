@@ -8,6 +8,7 @@ class Elevator:
 
     def __init__(self, state: State) -> None:
         self.setElevator(state)
+        self.numbero = 0
 
     # method to change the state of the object
     def setElevator(self, state: State):
@@ -64,6 +65,7 @@ class firstFloor(State):
     # if up button is pushed, move upwards then it changes its state to second floor.
     def pushUpBtn(self) -> None:
         print("Elevator moving upward one floor.")
+        print(self.elevator.numbero)
         self.elevator.setElevator(secondFloor())
 
 
@@ -73,8 +75,8 @@ class secondFloor(State):
     def pushDownBtn(self, value) -> int:
         print("Elevator moving down a floor...")
         print(value)
+        self.elevator.numbero=value
         self.elevator.setElevator(firstFloor())
-        return 3
 
     # if up button is pushed nothing should happen
     def pushUpBtn(self) -> None:
@@ -89,6 +91,7 @@ if __name__ == "__main__":
 
     # Up button is pushed
     myElevator.pushUpBtn()
-    print(myElevator.pushDownBtn(4))
+    myElevator.pushDownBtn(3)
+    myElevator.pushUpBtn()
 
     myElevator.presentState()

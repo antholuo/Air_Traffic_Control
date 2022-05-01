@@ -4,9 +4,11 @@ from abc import ABC, abstractmethod # not sure what this does
 
 class Plane:
     _state = None
-
-    def __init__(self, state: State) -> None:
+    AIRSPEED = 100 # 100m/s CONST
+    def __init__(self, state: State, loc: (float, float)) -> None:
         self.setState(state)
+        self.heading = self.getHeadingToCenter(loc)
+        self.loc = loc
 
     def setState(self, state: State) -> None:
         self._state = state
@@ -15,6 +17,10 @@ class Plane:
     def getState(self) -> str:
         print(f"Elevator is in {type(self._state).__name__}")
         return self._state
+
+    def getHeadingToCenter(self, loc: (float, float)) -> float:
+        return #heading to center after we figure out lat/lon
+
     # ------------------------------
     # interface methods begin here
     # ------------------------------
@@ -22,6 +28,9 @@ class Plane:
         pass
 
     def hold(self, center: (float, float), radius: int) -> None: # not sure how to get return values
+        pass
+
+    def updatePosition(self, delta_seconds: float) -> (float, float, float):
         pass
 
 class State(ABC):
@@ -39,4 +48,8 @@ class State(ABC):
 
     @abstractmethod
     def hold(self, center: (float, float), radius: int) -> None:
+        pass
+
+    @abstractmethod
+    def updatePosition(self, delta_seconds: float) -> (float, float, float):
         pass
