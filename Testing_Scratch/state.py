@@ -18,8 +18,8 @@ class Elevator:
         print(f"Elevator is in {type(self._state).__name__}")
 
     # the methods for executing the elevator functionality. These depends on the current state of the object.
-    def pushDownBtn(self):
-        self._state.pushDownBtn()
+    def pushDownBtn(self, value):
+        self._state.pushDownBtn(value)
 
     def pushUpBtn(self):
         self._state.pushUpBtn()
@@ -44,7 +44,7 @@ class State(ABC):
         self._elevator = elevator
 
     @abstractmethod
-    def pushDownBtn(self) -> None:
+    def pushDownBtn(self, value) -> None:
         pass
 
     @abstractmethod
@@ -57,7 +57,8 @@ class State(ABC):
 class firstFloor(State):
 
     # If the down button is pushed when it is already on the first floor, nothing should happen
-    def pushDownBtn(self) -> None:
+    def pushDownBtn(self, value) -> None:
+        print(value)
         print("Already in the bottom floor")
 
     # if up button is pushed, move upwards then it changes its state to second floor.
@@ -69,8 +70,9 @@ class firstFloor(State):
 class secondFloor(State):
 
     # if down button is pushed it should move one floor down and open the door
-    def pushDownBtn(self) -> None:
+    def pushDownBtn(self, value) -> None:
         print("Elevator moving down a floor...")
+        print(value)
         self.elevator.setElevator(firstFloor())
 
     # if up button is pushed nothing should happen
@@ -86,5 +88,6 @@ if __name__ == "__main__":
 
     # Up button is pushed
     myElevator.pushUpBtn()
+    myElevator.pushDownBtn(4)
 
     myElevator.presentState()
