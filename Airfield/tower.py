@@ -7,6 +7,8 @@ class Tower:
     def __init__(self, airfield):
         self.tower_id = 0;
         self.airfield = airfield;
+        self.latitude = 45.320165386    # in degrees
+        self.longitude = -75.668163994  # in degrees
 
     def landPlane(self, plane):
         #handles the last vectors for the plane.

@@ -5,10 +5,11 @@ from abc import ABC, abstractmethod # not sure what this does
 class Plane:
     _state = None
     AIRSPEED = 100 # 100m/s CONST
-    def __init__(self, state: State, loc: (float, float)) -> None:
+    def __init__(self, state: State, lat = float, lon = float, debug_outputs:bool=False) -> None:
         self.setState(state)
         self.heading = self.getHeadingToCenter(loc)
-        self.loc = loc
+        self.lat = lat
+        self.lon = lon
 
     def setState(self, state: State) -> None:
         self._state = state

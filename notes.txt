@@ -2,5 +2,10 @@
 Dealing with lat/lon
 https://www.igismap.com/formula-to-find-bearing-or-heading-angle-between-two-points-latitude-longitude/
 
+Visualization Options
+https://infopython.com/how-to-plot-longitude-and-latitude-data-using-python/
+https://towardsdatascience.com/geopandas-101-plot-any-data-with-a-latitude-and-longitude-on-a-map-98e01944b972
+
 Dealing with FSM
 https://learn.adafruit.com/circuitpython-101-state-machines?view=all
+https://auth0.com/blog/state-pattern-in-python/

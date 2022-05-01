@@ -9,10 +9,10 @@ class Flying(State):
 
     def updatePosition(self, delta_seconds: float=1):
         # calculate how far we have flown in delta time.
-        x = 0
-        y = 0
+        newlat = 0
+        newlon = 0
         heading = self.plane.heading
-        return x, y, heading
+        return newlat, newlon, heading
 
 class Holding(State):
     def updateHeading(self, heading: float) -> None:
@@ -20,7 +20,7 @@ class Holding(State):
         self.plane.setState(Flying())
 
     def updatePosition(self, delta_seconds: float=1) -> (float, float, float):
-        x = 0
-        y = 0
+        newlat = 0
+        newlon = 0
         heading = self.plane.heading
-        return x, y, heading
+        return newlat, newlon, heading
