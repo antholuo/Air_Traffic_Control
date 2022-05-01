@@ -28,6 +28,12 @@ class Flying(State):
                                   math.cos(dist / EARTH_RADIUS) - math.sin(lat) * math.sin(newlat))
         heading = self.plane.heading
 
+        newlat = math.degrees(newlat)
+        newlon = math.degrees(newlon)
+
+        self.plane.lat = newlat
+        self.plane.lon = newlon
+
         return newlat, newlon, heading
 
 
