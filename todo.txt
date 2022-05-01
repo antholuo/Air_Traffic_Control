@@ -8,6 +8,7 @@ Summary:    - Some visualization
             - Doesn't implement RTOS, but uses RTOS model?
             - Tries to use multithreading.
             - Planes can fly at all sorts of angles (not realistic).
+            - Planes fly at a constant speed the entire time
             - All planes fly at the same altitude (2d view, no queueing on top of each other).
             - maybe we try using proper lat/lon?
 
