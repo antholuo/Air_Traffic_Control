@@ -70,10 +70,11 @@ class firstFloor(State):
 class secondFloor(State):
 
     # if down button is pushed it should move one floor down and open the door
-    def pushDownBtn(self, value) -> None:
+    def pushDownBtn(self, value) -> int:
         print("Elevator moving down a floor...")
         print(value)
         self.elevator.setElevator(firstFloor())
+        return 3
 
     # if up button is pushed nothing should happen
     def pushUpBtn(self) -> None:
@@ -88,6 +89,6 @@ if __name__ == "__main__":
 
     # Up button is pushed
     myElevator.pushUpBtn()
-    myElevator.pushDownBtn(4)
+    print(myElevator.pushDownBtn(4))
 
     myElevator.presentState()
