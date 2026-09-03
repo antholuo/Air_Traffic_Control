@@ -12,9 +12,9 @@ fn draw_centered_text(text: &str, center_x: f32, center_y: f32, font_size: f32, 
 
 #[macroquad::main("AtcMain")]
 async fn main() {
+    let mut mouseclick: bool = false;
     loop {
         clear_background(GRAY);
-
         let screen_center_x = screen_width() / 2.0;
         let screen_center_y = screen_height() / 2.0;
 
@@ -27,9 +27,14 @@ async fn main() {
         draw_line(0.0, 0.0, 100.0, 100.0, 10.0, BLUE);
         draw_rectangle(screen_width() / 2.0 - 60.0, 100.0, 12.0, 60.0, GREEN);
 
-        // draw_text (text, x, y, font_size, colour)
-        // where x, y is bottom-left baseline anchor
-        draw_text("Hello, Macrquad!", 20.0, 20.0, 30.0, WHITE);
+        if is_mouse_button_pressed(MouseButton::Left) {
+            mouseclick = true;
+        }
+        if (mouseclick) {
+            // draw_text (text, x, y, font_size, colour)
+            // where x, y is bottom-left baseline anchor
+            draw_text("Hello, Macrquad!", 20.0, 20.0, 30.0, RED);
+        }
 
         next_frame().await
     }
