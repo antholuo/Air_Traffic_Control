@@ -12,6 +12,7 @@ fn draw_centered_text(text: &str, center_x: f32, center_y: f32, font_size: f32, 
 
 #[macroquad::main("AtcMain")]
 async fn main() {
+    let mut mousepos: (f32, f32) = (0.0, 0.0);
     let mut mouseclick: bool = false;
     loop {
         clear_background(GRAY);
@@ -29,11 +30,13 @@ async fn main() {
 
         if is_mouse_button_pressed(MouseButton::Left) {
             mouseclick = true;
+            mousepos = mouse_position();
         }
         if (mouseclick) {
             // draw_text (text, x, y, font_size, colour)
             // where x, y is bottom-left baseline anchor
             draw_text("Hello, Macrquad!", 20.0, 20.0, 30.0, RED);
+            draw_circle(mousepos.0, mousepos.1, 25.0, RED);
         }
 
         next_frame().await
