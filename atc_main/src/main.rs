@@ -20,20 +20,14 @@ async fn main() {
         // runs everytime to clear the background
         clear_background(GRAY);
 
-        // runs everytime in case the screen has been resized
+        // runs everytime in case the screen has been resized. Tracks the "center" of the screen
         // screen (0,0) is the top left corner
-        let reference_center_x = screen_width() / 2.0; // +x is to the right
-        let reference_center_y = screen_height() / 2.0; // +y is down
+        let screen_center_x = screen_width() / 2.0; // +x is to the right
+        let screen_center_y = screen_height() / 2.0; // +y is down
 
         let greeting = "Goofy Goomba";
         let font_size = 32.0;
-        draw_centered_text(
-            greeting,
-            reference_center_x,
-            reference_center_y,
-            font_size,
-            WHITE,
-        );
+        draw_centered_text(greeting, screen_center_x, screen_center_y, font_size, WHITE);
         // draw_line(x1, y1, x1, y2, thickness, colour);
         draw_line(0.0, 0.0, 100.0, 100.0, 10.0, BLUE);
         draw_rectangle(screen_width() / 2.0 - 60.0, 100.0, 12.0, 60.0, GREEN);
