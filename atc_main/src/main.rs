@@ -14,36 +14,60 @@ fn draw_centered_text(text: &str, center_x: f32, center_y: f32, font_size: f32, 
 
 #[macroquad::main("AtcMain")]
 async fn main() {
-    let mut mousepos: (f32, f32) = (0.0, 0.0);
-    let mut mouseclick: bool = false;
     loop {
-        // runs everytime to clear the background
-        clear_background(GRAY);
+        clear_background(LIGHTGRAY);
 
-        // runs everytime in case the screen has been resized. Tracks the "center" of the screen
-        // screen (0,0) is the top left corner
-        let screen_center_x = screen_width() / 2.0; // +x is to the right
-        let screen_center_y = screen_height() / 2.0; // +y is down
+        // Set the camera
+        // Note: I think position is x/y/z?
+        set_camera(&Camera3D {
+            position: vec3(50.0, 50.0, -50.0),
+            target: vec3(0.0, 0.0, 0.0),
+            up: vec3(0.0, 1.0, 0.0),
+            ..Default::default() // rest of the fields that I'm not gonna bother with for now
+        });
 
-        let greeting = "Goofy Goomba";
-        let font_size = 32.0;
-        draw_centered_text(greeting, screen_center_x, screen_center_y, font_size, WHITE);
-        // draw_line(x1, y1, x1, y2, thickness, colour);
-        draw_line(0.0, 0.0, 100.0, 100.0, 10.0, BLUE);
-        draw_rectangle(screen_width() / 2.0 - 60.0, 100.0, 12.0, 60.0, GREEN);
+        // slices (number of lines)
+        // spacing (how far apart)
+        draw_grid(100, 1.0, BLACK, GRAY);
 
-        if is_mouse_button_pressed(MouseButton::Left) {
-            mouseclick = true;
-
-            // TODO: determine how to map screen position to "reference" position
-            mousepos = mouse_position();
-
-            // TODO: spawn plane
-        }
-        if (mouseclick) {
-            draw_circle(mousepos.0, mousepos.1, 25.0, RED);
-        }
-
-        next_frame().await
+        next_frame().await;
     }
 }
+
+// Commenting out the old main for now
+
+// #[macroquad::main("AtcMain")]
+// async fn main() {
+//     let mut mousepos: (f32, f32) = (0.0, 0.0);
+//     let mut mouseclick: bool = false;
+//     loop {
+//         // runs everytime to clear the background
+//         clear_background(GRAY);
+//
+//         // runs everytime in case the screen has been resized. Tracks the "center" of the screen
+//         // screen (0,0) is the top left corner
+//         let screen_center_x = screen_width() / 2.0; // +x is to the right
+//         let screen_center_y = screen_height() / 2.0; // +y is down
+//
+//         let greeting = "Goofy Goomba";
+//         let font_size = 32.0;
+//         draw_centered_text(greeting, screen_center_x, screen_center_y, font_size, WHITE);
+//         // draw_line(x1, y1, x1, y2, thickness, colour);
+//         draw_line(0.0, 0.0, 100.0, 100.0, 10.0, BLUE);
+//         draw_rectangle(screen_width() / 2.0 - 60.0, 100.0, 12.0, 60.0, GREEN);
+//
+//         if is_mouse_button_pressed(MouseButton::Left) {
+//             mouseclick = true;
+//
+//             // TODO: determine how to map screen position to "reference" position
+//             mousepos = mouse_position();
+//
+//             // TODO: spawn plane
+//         }
+//         if (mouseclick) {
+//             draw_circle(mousepos.0, mousepos.1, 25.0, RED);
+//         }
+//
+//         next_frame().await
+//     }
+// }
