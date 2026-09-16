@@ -68,6 +68,7 @@ async fn main() {
             camera.rotation_degrees += rotation_dps_default * get_frame_time();
         }
 
+        set_camera(&camera.to_macroquad_camera_3d());
         // slices (number of lines)
         // spacing (how far apart)
         draw_grid(100, 1.0, BLACK, GRAY);
