@@ -1,6 +1,9 @@
 use macroquad::prelude::*;
 use trig::Trig;
 
+mod camera;
+use camera::Camera;
+
 fn draw_centered_text(text: &str, center_x: f32, center_y: f32, font_size: f32, color: Color) {
     let text_dims = measure_text(text, None, font_size as u16, 1.0);
 
@@ -57,7 +60,7 @@ async fn main() {
                     cam_angle_rotation -= delta.x * 100.0;
                     cam_angle_elevation = (cam_angle_elevation + delta.y * 100.0).clamp(5.0, 85.0);
                 } else {
-                    let rad = cam_angle_rotation.to_radiaggVGns();
+                    let rad = cam_angle_rotation.to_radians();
                     let right = vec2(-rad.sin(), rad.cos());
                     let forward = vec2(-rad.cos(), -rad.sin());
                     let pan_speed = 0.25;
@@ -116,4 +119,3 @@ async fn main() {
 //         next_frame().await
 //     }
 // }
-
