@@ -28,17 +28,10 @@ fn deg_to_coord(radius: f64, degrees: f64) -> (f64, f64) {
 
 #[macroquad::main("AtcMain")]
 async fn main() {
-    // Default camera parameters, assuming spherical-style camera.
-    let cam_default_radius = 88.0;
-    let cam_default_angle_elevation = 35.0;
-    let cam_default_angle_rotation = 0.0;
-    let cam_default_rotation_dps = 2.0;
-
-    let mut cam_radius = cam_default_radius;
-    let mut cam_angle_elevation = cam_default_angle_elevation;
-    let mut cam_angle_rotation = cam_default_angle_rotation;
-    let mut cam_target_xz = vec2(0.0, 0.0); // point camera is looking at on the ground plane
+    let rotation_dps_default = 2.0;
     let mut auto_rotate = true;
+
+    let mut camera = Camera::new(88.0, 35.0, 0.0, vec2(0.0, 0.0));
 
     loop {
         clear_background(LIGHTGRAY);
@@ -47,7 +40,7 @@ async fn main() {
         let wheel = mouse_wheel();
         if wheel.1 != 0.0 {
             auto_rotate = false;
-            cam_radius = (cam_radius - wheel.1 * 5.0).clamp(20.0, 300.0); // set min/max distance
+            camera.radius = (camera.radius - wheel.1 * 5.0).clamp(20.0, 300.0); // set min/max distance
             // with clamp
         }
         if is_mouse_button_down(MouseButton::Left) {
@@ -57,26 +50,40 @@ async fn main() {
                 let ctrl_pressed =
                     is_key_down(KeyCode::LeftControl) || is_key_down(KeyCode::RightControl);
                 if ctrl_pressed {
-                    cam_angle_rotation -= delta.x * 100.0;
-                    cam_angle_elevation = (cam_angle_elevation + delta.y * 100.0).clamp(5.0, 85.0);
+                    camera.rotation_degrees -= delta.x * 100.0;
+                    camera.elevation_degrees =
+                        (camera.elevation_degrees + delta.y * 100.0).clamp(5.0, 85.0);
                 } else {
-                    let rad = cam_angle_rotation.to_radians();
+                    let rad = camera.rotation_degrees.to_radians();
                     let right = vec2(-rad.sin(), rad.cos());
                     let forward = vec2(-rad.cos(), -rad.sin());
                     let pan_speed = 0.25;
-                    cam_target_xz -= (right * delta.x + forward * delta.y) * pan_speed;
+                    camera.target_xy -= (right * delta.x + forward * delta.y) * pan_speed;
                 }
             }
         }
 
         // auto rotation
         if auto_rotate {
-            cam_angle_rotation += cam_default_rotation_dps * get_frame_time();
+            camera.rotation_degrees += rotation_dps_default * get_frame_time();
         }
 
         // slices (number of lines)
         // spacing (how far apart)
         draw_grid(100, 1.0, BLACK, GRAY);
+
+        // --- 2D UI OVERLAY PASS ---
+        set_default_camera();
+        draw_centered_text(
+            &format!(
+                "Radius: {:.1} | Elevation: {:.1} | Rotation: {:.1}",
+                camera.radius, camera.elevation_degrees, camera.rotation_degrees
+            ),
+            screen_width() / 2.0,
+            30.0,
+            20.0,
+            BLACK,
+        );
 
         next_frame().await;
     }
