@@ -1,4 +1,5 @@
 use macroquad::prelude::*;
+use macroquad::ui::{hash, root_ui};
 use trig::Trig;
 
 mod camera;
@@ -68,24 +69,64 @@ async fn main() {
             camera.rotation_degrees += rotation_dps_default * get_frame_time();
         }
 
+        // --------------------
+        // Render camera
         set_camera(&camera.to_macroquad_camera_3d());
+
+        // --------------------
+        // 3D objects
         // slices (number of lines)
         // spacing (how far apart)
         draw_grid(100, 1.0, BLACK, GRAY);
 
-        // --- 2D UI OVERLAY PASS ---
+        // --------------------
+        // 2D rendering (ui controls)
         set_default_camera();
-        draw_centered_text(
-            &format!(
-                "Radius: {:.1} | Elevation: {:.1} | Rotation: {:.1}",
-                camera.radius, camera.elevation_degrees, camera.rotation_degrees
-            ),
-            screen_width() / 2.0,
-            30.0,
-            20.0,
+
+        let bar_height = 32.0;
+        let bar_y = screen_height() - bar_height;
+        draw_rectangle(
+            0.0,
+            bar_y,
+            screen_width(),
+            bar_height,
+            Color::new(0.85, 0.85, 0.85, 0.95),
+        );
+        draw_line(0.0, bar_y, screen_width(), bar_y, 1.0, GRAY); // Top border line
+        let info_text = format!(
+            "Radius: {:.1}   |   Elevation: {:.1}   |   Rotation: {:.1}",
+            camera.radius, camera.elevation_degrees, camera.rotation_degrees
+        );
+        draw_text(&info_text, 15.0, bar_y + 21.0, 14.0, BLACK);
+
+        let checkbox_width = 130.0;
+        let checkbox_x = screen_width() - checkbox_width - 15.0;
+        let checkbox_y = bar_y + 7.0;
+        let box_size = 18.0;
+        let mouse_pos = mouse_position();
+        let mouse_clicked = is_mouse_button_pressed(MouseButton::Left);
+        let checkbox_rect = Rect::new(checkbox_x, checkbox_y, box_size, box_size);
+        if mouse_clicked && checkbox_rect.contains(mouse_pos.into()) {
+            auto_rotate = !auto_rotate;
+        }
+        draw_rectangle(checkbox_x, checkbox_y, box_size, box_size, WHITE);
+        draw_rectangle_lines(checkbox_x, checkbox_y, box_size, box_size, 1.5, BLACK);
+        if auto_rotate {
+            draw_rectangle(
+                checkbox_x + 4.0,
+                checkbox_y + 4.0,
+                box_size - 8.0,
+                box_size - 8.0,
+                BLACK,
+            );
+        }
+        draw_text(
+            "Auto Rotate",
+            checkbox_x + box_size + 8.0,
+            checkbox_y + 14.0,
+            14.0,
             BLACK,
         );
-
         next_frame().await;
     }
 }
