@@ -50,20 +50,28 @@ async fn main() {
                 auto_rotate = false;
                 let ctrl_pressed =
                     is_key_down(KeyCode::LeftControl) || is_key_down(KeyCode::RightControl);
+
                 if ctrl_pressed {
-                    camera.rotation_degrees -= delta.x * 100.0;
+                    // Orbit / Tilt
+                    camera.rotation_degrees += delta.x * 100.0;
                     camera.elevation_degrees =
                         (camera.elevation_degrees + delta.y * 100.0).clamp(5.0, 85.0);
                 } else {
+                    // Pan (Corrected camera-relative XZ vectors)
                     let rad = camera.rotation_degrees.to_radians();
-                    let right = vec2(-rad.sin(), rad.cos());
-                    let forward = vec2(-rad.cos(), -rad.sin());
-                    let pan_speed = 0.25;
-                    camera.target_xy -= (right * delta.x + forward * delta.y) * pan_speed;
+                    let sin = rad.sin();
+                    let cos = rad.cos();
+
+                    // Correct direction vectors matching Macroquad's Y-up spherical camera
+                    let forward = vec2(-sin, -cos);
+                    let right = vec2(cos, -sin);
+                    let pan_speed = 10.0;
+
+                    // Subtracting makes the world "grab and drag" smoothly with the mouse
+                    camera.target_xy -= (right * (-delta.x) + forward * delta.y) * pan_speed;
                 }
             }
         }
-
         // auto rotation
         if auto_rotate {
             camera.rotation_degrees += rotation_dps_default * get_frame_time();
@@ -83,6 +91,7 @@ async fn main() {
         // 2D rendering (ui controls)
         set_default_camera();
 
+        // draw hte bar
         let bar_height = 32.0;
         let bar_y = screen_height() - bar_height;
         draw_rectangle(
@@ -94,18 +103,51 @@ async fn main() {
         );
         draw_line(0.0, bar_y, screen_width(), bar_y, 1.0, GRAY); // Top border line
         let info_text = format!(
-            "Radius: {:.1}   |   Elevation: {:.1}   |   Rotation: {:.1}",
+            "Radius: {:.1}    |    Elevation: {:.1}    |    Rotation: {:.1}",
             camera.radius, camera.elevation_degrees, camera.rotation_degrees
         );
         draw_text(&info_text, 15.0, bar_y + 21.0, 14.0, BLACK);
 
-        let checkbox_width = 130.0;
-        let checkbox_x = screen_width() - checkbox_width - 15.0;
-        let checkbox_y = bar_y + 7.0;
-        let box_size = 18.0;
+        // Reset button
         let mouse_pos = mouse_position();
         let mouse_clicked = is_mouse_button_pressed(MouseButton::Left);
-        let checkbox_rect = Rect::new(checkbox_x, checkbox_y, box_size, box_size);
+        let reset_w = 60.0;
+        let reset_h = 20.0;
+        let reset_x = screen_width() - 15.0 - reset_w;
+        let reset_y = bar_y + 6.0;
+        let reset_rect = Rect::new(reset_x, reset_y, reset_w, reset_h);
+        if mouse_clicked && reset_rect.contains(mouse_pos.into()) {
+            // Reset camera back to default values
+            camera.radius = 88.0;
+            camera.elevation_degrees = 35.0;
+            camera.rotation_degrees = 0.0;
+            camera.target_xy = vec2(0.0, 0.0);
+            auto_rotate = true;
+        }
+        draw_rectangle(
+            reset_x,
+            reset_y,
+            reset_w,
+            reset_h,
+            Color::new(0.9, 0.9, 0.9, 1.0),
+        );
+        draw_rectangle_lines(reset_x, reset_y, reset_w, reset_h, 1.0, DARKGRAY);
+        let reset_text = "Reset";
+        let reset_text_dims = measure_text(reset_text, None, 13, 1.0);
+        draw_text(
+            reset_text,
+            reset_x + (reset_w - reset_text_dims.width) / 2.0,
+            reset_y + 14.0,
+            13.0,
+            BLACK,
+        );
+
+        // B. Auto-Rotate Checkbox
+        let checkbox_w = 115.0; // clickable width including label text
+        let checkbox_x = reset_x - checkbox_w - 15.0;
+        let checkbox_y = bar_y + 7.0;
+        let box_size = 18.0;
+        let checkbox_rect = Rect::new(checkbox_x, checkbox_y, checkbox_w, box_size);
         if mouse_clicked && checkbox_rect.contains(mouse_pos.into()) {
             auto_rotate = !auto_rotate;
         }
@@ -127,6 +169,9 @@ async fn main() {
             14.0,
             BLACK,
         );
+
+        // --------------------
+        // Draw the frame
         next_frame().await;
     }
 }
