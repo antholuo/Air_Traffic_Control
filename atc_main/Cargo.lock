@@ -19,6 +19,7 @@ name = "atc_main"
 version = "0.1.0"
 dependencies = [
  "macroquad",
+ "trig",
 ]
 
 [[package]]
@@ -268,6 +269,12 @@ name = "simd-adler32"
 version = "0.3.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3a219298ac11a56ea9a6d2120044824d6f01aeb034955e7af7bc16858527deea"
+
+[[package]]
+name = "trig"
+version = "0.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "bcebce5982c2b16656a085819d3e6389a9239cf936c222b44b8431238fcb9f20"
 
 [[package]]
 name = "ttf-parser"
