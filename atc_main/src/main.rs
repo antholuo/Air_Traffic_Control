@@ -13,7 +13,7 @@ fn draw_centered_text(text: &str, center_x: f32, center_y: f32, font_size: f32, 
     draw_text(text, x, y, font_size, color);
 }
 
-fn deg_to_coord(radius: f32, degrees: f32) -> (f32, f32) {
+fn deg_to_coord(radius: f64, degrees: f64) -> (f64, f64) {
     // Given SOH CAH TOA
     // x = cos(degrees) * radius
     // y = sin(degrees) * radius
@@ -25,27 +25,51 @@ fn deg_to_coord(radius: f32, degrees: f32) -> (f32, f32) {
 
 #[macroquad::main("AtcMain")]
 async fn main() {
-    let cam_radius: f32 = 80.0;
-    let cam_y: f32 = 50.0;
-    let cam_rotation_dps: f32 = 2.0;
-    let mut cam_rotation_angle: f32 = 0.0;
+    // Default camera parameters, assuming spherical-style camera.
+    let cam_default_radius = 88.0;
+    let cam_default_angle_elevation = 35.0;
+    let cam_default_angle_rotation = 0.0;
+    let cam_default_rotation_dps = 2.0;
+
+    let mut cam_radius = cam_default_radius;
+    let mut cam_angle_elevation = cam_default_angle_elevation;
+    let mut cam_angle_rotation = cam_default_angle_rotation;
+    let mut cam_target_xz = vec2(0.0, 0.0); // point camera is looking at on the ground plane
+    let mut auto_rotate = true;
+
     loop {
         clear_background(LIGHTGRAY);
 
-        // calculate camera rotation
-        cam_rotation_angle += cam_rotation_dps * get_frame_time(); // Rotate N degrees per second
-        //
+        // Mouse interaction
+        let wheel = mouse_wheel();
+        if wheel.1 != 0.0 {
+            auto_rotate = false;
+            cam_radius = (cam_radius - wheel.1 * 5.0).clamp(20.0, 300.0); // set min/max distance
+            // with clamp
+        }
+        if is_mouse_button_down(MouseButton::Left) {
+            let delta = mouse_delta_position();
+            if delta.length_squared() > 0.0 {
+                auto_rotate = false;
+                let ctrl_pressed =
+                    is_key_down(KeyCode::LeftControl) || is_key_down(KeyCode::RightControl);
+                if ctrl_pressed {
+                    cam_angle_rotation -= delta.x * 100.0;
+                    cam_angle_elevation = (cam_angle_elevation + delta.y * 100.0).clamp(5.0, 85.0);
+                } else {
+                    let rad = cam_angle_rotation.to_radiaggVGns();
+                    let right = vec2(-rad.sin(), rad.cos());
+                    let forward = vec2(-rad.cos(), -rad.sin());
+                    let pan_speed = 0.25;
+                    cam_target_xz -= (right * delta.x + forward * delta.y) * pan_speed;
+                }
+            }
+        }
 
-        let (cam_x, cam_z) = deg_to_coord(cam_radius, cam_rotation_angle);
-
-        // Set the camera
-        // Note: I think position is x/y/z?
-        set_camera(&Camera3D {
-            position: vec3(cam_x, cam_y, cam_z),
-            target: vec3(0.0, 0.0, 0.0),
-            up: vec3(0.0, 1.0, 0.0),
-            ..Default::default() // rest of the fields that I'm not gonna bother with for now
-        });
+        // auto rotation
+        if auto_rotate {
+            cam_angle_rotation += cam_default_rotation_dps * get_frame_time();
+        }
 
         // slices (number of lines)
         // spacing (how far apart)
@@ -92,3 +116,4 @@ async fn main() {
 //         next_frame().await
 //     }
 // }
+
